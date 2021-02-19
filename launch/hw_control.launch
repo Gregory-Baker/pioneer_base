@@ -1,0 +1,32 @@
+<!-- https://answers.ros.org/question/221093/basic-diff_drive-question/ -->
+<!-- https://github.com/ros-controls/ros_controllers/tree/kinetic-devel/diff_drive_controller/test -->
+
+<launch>
+
+	<!-- Load robot model -->
+	<param name="robot_description"
+    	   command="$(find xacro)/xacro '$(find amr_robots_description)/urdf/pioneer3at.urdf.xacro' --inorder"/>
+
+   <rosparam param="/pioneer/control_frequency">20</rosparam>
+   <rosparam param="/pioneer/pid_gains">[0, 100, 0]</rosparam>
+
+   <node name = "serial_node"
+        pkg  = "rosserial_python" 
+        type = "serial_node.py" 
+        args = "/dev/ttyACM0"/>
+
+    <node name="pioneer_base_node" 
+          pkg="pioneer_base" 
+          type="pioneer_base_node"/>
+
+    <!-- Load controller config -->
+    <rosparam command="load" 
+              file="$(find pioneer_base)/config/pioneer_common.yaml"/>
+
+    <node name="controller_spawner" 
+          pkg="controller_manager" 
+          type="spawner" 
+          output="screen" 
+          args="pioneer_joint_publisher pioneer_velocity_controller"/> 
+          
+</launch>
